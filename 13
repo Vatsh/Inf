@@ -1,0 +1,816 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+namespace Cars
+{
+    class Program
+    {
+        public struct Car
+        {
+            public string Mark;
+            public int Age;
+            public double V;
+            public LinkedList<int> A;
+        };
+        public struct Owner
+        {
+            public string Name;
+            public string Data;
+            public string Category;
+            public LinkedList<int> B;
+        };
+
+        public static void Menu()
+        {
+            Console.WriteLine("Добро пожаловать! Выберете интересующуй Вас пункт меню. ");
+            Console.WriteLine();
+            Console.WriteLine("1) Ввод нового автомобиля;");
+            Console.WriteLine("2) Ввод нового владельца;");
+            Console.WriteLine("3) Вывод списка (на выбор) на экран;");
+            Console.WriteLine("4) Связывание двух элементов;");
+            Console.WriteLine("5) Сохранение данных в бинарный файл;");
+            Console.WriteLine("6) Вывод данных из бинарного файла на экран;");
+            Console.WriteLine("7) Выход");
+            Console.WriteLine(">>>");
+        }
+
+        public static void Show_Car(LinkedList<Car> Car_new)
+        {
+            int i = 1;
+            LinkedListNode<Car> node_A;
+
+            for (node_A = Car_new.First; node_A != null; node_A = node_A.Next)
+            {
+                Console.WriteLine(i + ") " + node_A.Value.Mark + ", " + node_A.Value.Age + ", объем двигателя - " + node_A.Value.V);
+                i++;
+            }
+            Console.WriteLine();
+        }
+        public static void ShowOwner(LinkedList<Owner> Owner_new)
+        {
+            int i = 1;
+            LinkedListNode<Owner> node_B;
+
+            for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+            {
+                Console.WriteLine(i + ") " + node_B.Value.Name + ", " + " права с " + node_B.Value.Data + ", категория " + node_B.Value.Category);
+                i++;
+            }
+        }
+
+        public static LinkedList<Car> Info_Cars(ref LinkedList<Car> Car_new)
+        {
+            Car element;
+
+            Console.WriteLine("Марка автомобиля: ");
+            element.Mark = Console.ReadLine();
+            Console.WriteLine("Год выпуска автомобиля: ");
+            element.Age = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Объем двигателя: ");
+            element.V = Convert.ToDouble(Console.ReadLine());
+            while (element.V <= 0)
+            {
+                Console.WriteLine("Ошибка в значении. Введите ещё раз: ");
+                element.V = Convert.ToDouble(Console.ReadLine());
+            }
+            Console.Clear();
+
+            element.A = new LinkedList<int>();
+            Car_new.AddLast(element);
+            return Car_new;
+        }
+
+        public static LinkedList<Owner> Info_Owner(ref LinkedList<Owner> Owner_new)
+        {
+            Owner element;
+            int day, month, year;
+
+            Console.WriteLine("ФИО водителя: ");
+            element.Name = Console.ReadLine();
+
+            Console.WriteLine("Дата получения прав - ");
+            Console.WriteLine("Введите день:");
+            day = Convert.ToInt32(Console.ReadLine());
+            while (day <= 0 || day > 31)
+            {
+                Console.WriteLine("Ошибка ввода. Попробуйте ещё раз: ");
+                day = Convert.ToInt32(Console.ReadLine());
+            }
+            Console.WriteLine("Месяц:");
+            month = Convert.ToInt32(Console.ReadLine());
+            while (month <= 0 || month > 12)
+            {
+                Console.WriteLine("Ошибка ввода. Попробуйте ещё раз: ");
+                month = Convert.ToInt32(Console.ReadLine());
+            }
+            Console.WriteLine("Год:");
+            year = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("Категория прав: ");
+            element.Category = Console.ReadLine();
+
+            if (day < 10 && month < 10)
+            {
+                element.Data = "0" + day + ".0" + month + "." + year;
+            }
+            else
+            if (day < 10 && month >= 10)
+            {
+                element.Data = "0" + day + "." + month + "." + year;
+            }
+            else
+            if (day >= 10 && month < 10)
+            {
+                element.Data = day + ".0" + month + "." + year;
+            }
+            else
+            {
+                element.Data = day + "." + month + "." + year;
+            }
+            element.B = new LinkedList<int>();
+            Owner_new.AddLast(element);
+
+            return Owner_new;
+        }
+
+        public static void Show_All(LinkedList<Car> Car_new, LinkedList<Owner> Owner_new, int Max1, int Max2)
+        {
+            int i = 1;
+            int choice = 0;
+            bool x;
+
+            LinkedListNode<Car> node_A;
+            LinkedListNode<Owner> node_B;
+            LinkedListNode<int> A;
+
+            Console.WriteLine("Какой список отобразить? ");
+            Console.WriteLine("1) cписок всех автомобилей; ");
+            Console.WriteLine("2) список всех автовладельцев; ");
+            Console.WriteLine("3) список всех авто, связанных с опредленным человеком; ");
+            Console.WriteLine("4) список всех людей, связанных с опредленным авто; ");
+            Console.WriteLine(">>>");
+            choice = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine(" При выводе списка использовать сортировку? [да/нет]");
+            Console.WriteLine(">>>");
+            if (Console.ReadLine() == "да") x = true;
+            else x = false;
+
+            switch (choice)
+            {
+                case 1:
+                    {
+                        if (x == true)
+                        {
+                            Console.WriteLine("Выберете способ сортировки: ");
+                            Console.WriteLine("1) по марке;");
+                            Console.WriteLine("2) по году выпуска;");
+                            Console.WriteLine("3) по объему двигателя;");
+                            choice = Convert.ToInt32(Console.ReadLine());
+
+                            Console.Clear();
+
+                            switch (choice)
+                            {
+                                case 1:
+                                    {
+                                        for (int j = 0; j < Max1; j++)
+                                        {
+                                            for (node_A = Car_new.First; node_A != null; node_A = node_A.Next)
+                                            {
+                                                if (String.Compare(node_A.Value.Mark, node_A.Next.Value.Mark) > 0)
+                                                {
+                                                    Car_new.AddAfter(node_A.Next, node_A.Value);
+                                                    Car_new.Remove(node_A);
+                                                }
+                                            }
+                                        }
+                                        Show_Car(Car_new);
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        for (int j = 0; j < Max1; j++)
+                                        {
+                                            for (node_A = Car_new.First; node_A != null; node_A = node_A.Next)
+                                            {
+                                                if (node_A.Value.Age > node_A.Next.Value.Age)
+                                                {
+                                                    Car_new.AddAfter(node_A.Next, node_A.Value);
+                                                    Car_new.Remove(node_A);
+                                                }
+                                            }
+                                        }
+                                        Show_Car(Car_new);
+                                        break;
+                                    }
+                                case 3:
+                                    {
+                                        for (int j = 0; j < Max1; j++)
+                                        {
+                                            for (node_A = Car_new.First; node_A != null; node_A = node_A.Next)
+                                            {
+                                                if (node_A.Value.V > node_A.Next.Value.V)
+                                                {
+                                                    Car_new.AddAfter(node_A.Next, node_A.Value);
+                                                    Car_new.Remove(node_A);
+                                                }
+                                            }
+                                        }
+                                        Show_Car(Car_new);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("Ошибка ввода. Попробуйте ещё раз: ");
+                                        choice = Convert.ToInt32(Console.ReadLine());
+                                        break;
+                                    }
+                            }
+                        }
+                        else Show_Car(Car_new);
+                        break;
+                    }
+
+                case 2:
+                    {
+                        if (x == true)
+                        {
+                            Console.WriteLine("Выберете способ сортировки: ");
+                            Console.WriteLine("1) по ФИО; ");
+                            Console.WriteLine("2) по категории прав; ");
+                            Console.WriteLine("3) по дате получения прав; ");
+                            choice = choice = Convert.ToInt32(Console.ReadLine());
+
+                            switch (choice)
+                            {
+                                case 1:
+                                    {
+                                        for (int j = 0; j < Max2; j++)
+                                        {
+                                            for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+                                            {
+                                                if (String.Compare(node_B.Value.Name, node_B.Next.Value.Name) > 0)
+                                                {
+                                                    Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                                    Owner_new.Remove(node_B);
+                                                }
+                                            }
+                                        }
+                                        ShowOwner(Owner_new);
+                                        break;
+                                    }
+                                case 2:
+                                    {
+                                        for (int j = 0; j < Max2; j++)
+                                        {
+                                            for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+                                            {
+                                                if (String.Compare(node_B.Value.Category, node_B.Next.Value.Category) > 0)
+                                                {
+                                                    Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                                    Owner_new.Remove(node_B);
+                                                }
+                                            }
+                                        }
+                                        ShowOwner(Owner_new);
+                                        break;
+                                    }
+                                case 3:
+                                    {
+                                        for (int j = 0; j < Max2; j++)
+                                        {
+                                            for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+                                            {
+                                                string spec1 = node_B.Value.Data.Remove(2);
+                                                string spec2 = node_B.Next.Value.Data.Remove(2);
+                                                if (String.Compare(spec1, spec2) > 0)
+                                                {
+                                                    Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                                    Owner_new.Remove(node_B);
+                                                }
+                                            }
+                                            for (j = 0; j < Max2; j++)
+                                            {
+                                                for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+                                                {
+                                                    string spec1 = node_B.Value.Data.Substring(3, 2);
+                                                    string spec2 = node_B.Next.Value.Data.Substring(3, 2);
+                                                    if (String.Compare(spec1, spec2) > 0)
+                                                    {
+                                                        Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                                        Owner_new.Remove(node_B);
+                                                    }
+                                                }
+                                            }
+                                            for (j = 0; j < Max2; j++)
+                                            {
+                                                for (node_B = Owner_new.First; node_B != null; node_B = node_B.Next)
+                                                {
+                                                    string spec1 = node_B.Value.Category.Substring(6, 4);
+                                                    string spec2 = node_B.Next.Value.Category.Substring(6, 4);
+                                                    if (String.Compare(spec1, spec2) > 0)
+                                                    {
+                                                        Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                                        Owner_new.Remove(node_B);
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                        ShowOwner(Owner_new);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("Ошибка ввода. Попробуйте ещё раз: ");
+                                        choice = Convert.ToInt32(Console.ReadLine());
+                                        break;
+                                    }
+                            }
+                        } else ShowOwner(Owner_new);
+
+                        break;
+                    }
+                case 3:
+                    {
+                        {
+                            Console.WriteLine("Выберите порядковый номер автовладельца: ");
+                            ShowOwner(Owner_new);
+                            i = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+
+                            node_B = Owner_new.First;
+                            for (int j = 1; j < i; j++)
+                            {
+                                node_B = node_B.Next;
+                            }
+                            A = node_B.Value.B.First;
+
+                            Console.WriteLine("Связанные с выбранным человеком машины: ");
+                            int a = 1;
+                            while (A != null)
+                            {
+                                i = A.Value;
+                                node_A = Car_new.First;
+                                for (int j = 1; j < i; j++)
+                                {
+                                    node_A = node_A.Next;
+                                }
+
+                                Console.WriteLine(a + ") " + node_A.Value.Mark + node_A.Value.Age + "-ого года выпуска, объем двигателя" + node_A.Value.V + " рублей(я)");
+                                A = A.Next;
+                                a++;
+                            }
+                            break;
+                        }
+                    }
+                case 4:
+                    {
+                        Console.WriteLine("Выберите порядковый номер авто: ");
+                        Show_Car(Car_new);
+                        i = Convert.ToInt32(Console.ReadLine());
+                        Console.Clear();
+
+                        node_A = Car_new.First;
+                        for (int j = 1; j < i; j++)
+                        {
+                            node_A = node_A.Next;
+                        }
+                        A = node_A.Value.A.First;
+
+                        Console.WriteLine("Связанные с выбранным авто люди: ");
+                        int a = 1;
+                        while (A != null)
+                        {
+                            i = A.Value;
+                            node_B = Owner_new.First;
+                            for (int k = 1; k < i; k++)
+                            {
+                                node_B = node_B.Next;
+                            }
+                            Console.WriteLine(a + ") " + node_B.Value.Name + ", " + "права получены: " + node_B.Value.Data + ", категория прав:  " + node_B.Value.Category);
+                            A = A.Next;
+                            a++;
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        Console.WriteLine("Ошибка ввода. Попробуйте ещё раз: ");
+                        choice = Convert.ToInt32(Console.ReadLine());
+                        break;
+                    }
+            }
+        }
+
+        public static void Relation(ref LinkedList<Car> Car_new, ref LinkedList<Owner> Owner_new)
+        {
+            int choice, choice_1;
+            bool x = false, y = false;
+            int a = 0;
+            LinkedListNode<Car> node_A;
+            LinkedListNode<Owner> node_B;
+            LinkedListNode<int> relationship;
+            Console.WriteLine("Выберите тип связи: ");
+            Console.WriteLine("1) авто и человек; ");
+            Console.WriteLine("2) человек и авто; ");
+            choice = Convert.ToInt32(Console.ReadLine());
+
+            switch (choice)
+            {
+                case 1:
+                    {
+                        while (y == false)
+                        {
+                            Show_Car(Car_new);
+                            Console.WriteLine("Выберите порядковый номер авто: ");
+                            choice = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+                            ShowOwner(Owner_new);
+                            Console.WriteLine("Выберите номер человека, с которым необходимо связать авто: ");
+                            choice_1 = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+
+                            node_A = Car_new.First;
+                            for (int j = 1; j < choice_1; j++)
+                            {
+                                node_A = node_A.Next;
+                            }
+                            for (relationship = node_A.Value.A.First; relationship != null; relationship = relationship.Next)
+                            {
+                                if (choice_1 == relationship.Value)
+                                {
+                                    Console.WriteLine("Данный человек уже связан с авто. ");
+                                    Console.ReadKey(false);
+                                    Console.Clear();
+                                    x = true;
+                                    break;
+                                }
+                                x = false;
+                            }
+                            if (x == false)
+                            {
+                                node_A.Value.A.AddLast(choice_1);
+                                if (node_A.Next == null && node_A.Previous == null)
+                                {
+                                    Car_new.Remove(node_A);
+                                    Car_new.AddLast(node_A);
+                                }
+                                if (node_A.Next != null)
+                                {
+                                    Car_new.AddAfter(node_A.Next, node_A.Value);
+                                    Car_new.Remove(node_A);
+                                    node_A = Car_new.First;
+                                    for (int k = 1; k < choice_1; k++)
+                                    {
+                                        node_A = node_A.Next;
+                                    }
+                                    Car_new.AddAfter(node_A.Next, node_A.Value);
+                                    Car_new.Remove(node_A);
+                                }
+                                if (node_A.Next == null && node_A.Previous != null)
+                                {
+                                    Car_new.AddBefore(node_A.Previous, node_A.Value);
+                                    Car_new.Remove(node_A);
+                                    node_A = Car_new.First;
+                                    for (int k = 1; k < choice_1; k++)
+                                    {
+                                        node_A = node_A.Next;
+                                    }
+                                    Car_new.AddBefore(node_A.Previous, node_A.Value);
+                                    Car_new.Remove(node_A);
+                                }
+                            }
+                            Console.WriteLine("Продолжить связывать элементы?");
+                            Console.WriteLine("1)Да");
+                            Console.WriteLine("2)Нет");
+                            a = Convert.ToInt32(Console.ReadLine());
+                            while (a != 1 && a != 2)
+                            {
+                                Console.WriteLine("Введено неверное значение!");
+                                a = Convert.ToInt32(Console.ReadLine());
+                                Console.Clear();
+                            }
+                            if (a == 2)
+                            {
+                                y = true;
+                            }
+                            Console.Clear();
+                        }
+                        break;
+                    }
+                case 2:
+                    {
+                        while (y == false)
+                        {
+                            ShowOwner(Owner_new);
+                            Console.WriteLine("Выберите порядковый номер человека: ");
+                            choice = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+
+                            Show_Car(Car_new);
+                            Console.WriteLine("Выберите порядковый номер авто, с которым необходимо связать человека: "); ;
+                            choice_1 = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+
+                            node_B = Owner_new.First;
+                            for (int j = 1; j < choice_1; j++)
+                            {
+                                node_B = node_B.Next;
+                            }
+                            for (relationship = node_B.Value.B.First; relationship != null; relationship = relationship.Next)
+                            {
+                                if (choice_1 == relationship.Value)
+                                {
+                                    Console.WriteLine("Данное авто уже связано с человеком.");
+                                    Console.ReadKey(false);
+                                    Console.Clear();
+                                    x = true;
+                                    break;
+                                }
+                                x = false;
+                            }
+                            if (x == false)
+                            {
+                                node_B.Value.B.AddLast(choice_1);
+                                if (node_B.Next == null && node_B.Previous == null)
+                                {
+                                    Owner_new.Remove(node_B);
+                                    Owner_new.AddLast(node_B);
+                                }
+                                if (node_B.Next != null)
+                                {
+                                    Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                    Owner_new.Remove(node_B);
+                                    node_B = Owner_new.First;
+                                    for (int k = 1; k < choice_1; k++)
+                                    {
+                                        node_B = node_B.Next;
+                                    }
+                                    Owner_new.AddAfter(node_B.Next, node_B.Value);
+                                    Owner_new.Remove(node_B);
+                                }
+                                if (node_B.Next == null && node_B.Previous != null)
+                                {
+                                    Owner_new.AddBefore(node_B.Previous, node_B.Value);
+                                    Owner_new.Remove(node_B);
+                                    node_B = Owner_new.First;
+                                    for (int k = 1; k < choice_1; k++)
+                                    {
+                                        node_B = node_B.Next;
+                                    }
+                                    Owner_new.AddBefore(node_B.Previous, node_B.Value);
+                                    Owner_new.Remove(node_B);
+                                }
+                            }
+                            Console.WriteLine("Продолжить связывание?");
+                            Console.WriteLine("1)Да");
+                            Console.WriteLine("2)Нет");
+                            a = Convert.ToInt32(Console.ReadLine());
+                            while (a != 1 && a != 2)
+                            {
+                                Console.WriteLine("Введено неверное значение!");
+                                a = Convert.ToInt32(Console.ReadLine());
+                                Console.Clear();
+                            }
+                            if (a == 2)
+                            {
+                                y = true;
+                            }
+                            Console.Clear();
+                        }
+                        break;
+                    }
+            }
+        }
+
+        public static void To_Binary(LinkedList<Car> Car_new, LinkedList<Owner> Owner_new, ref string way)
+        {
+            LinkedListNode<Car> node_A;
+            LinkedListNode<Owner> node_B;
+            int choice;
+            int x = 0;
+            Console.WriteLine("Введите путь к файлу: [*.dat] ");
+            way = Console.ReadLine();
+            FileInfo file = new FileInfo(way);
+            while (file.Exists == false)
+            {
+                Console.WriteLine("Файла с таким путем не существует, выбрать другой файл или создать по данному адресу новый?");
+                Console.WriteLine("1)Выбрать существующий путь");
+                Console.WriteLine("2)Создать новый файл по данному пути");
+                choice = Convert.ToInt32(Console.ReadLine());
+
+                switch (choice)
+                {
+                    case 1:
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Другой путь: ");
+                            way = Console.ReadLine();
+                            file = new FileInfo(way);
+                            Console.Clear();
+                        }
+                        break;
+                    case 2:
+                        break;
+                    default:
+                        {
+                            Console.WriteLine("Ошибка. Попробуйте ещё раз: ");
+                            choice = Convert.ToInt32(Console.ReadLine());
+                        }
+                        break;
+                }
+            }
+
+            BinaryWriter writer = new BinaryWriter(File.Open(way, FileMode.OpenOrCreate));
+            writer.Close();
+            writer = new BinaryWriter(File.Open(way, FileMode.Truncate));
+            foreach (Car s in Car_new)
+            {
+                writer.Write(s.Mark);
+                writer.Write(s.Age);
+                writer.Write(s.V);
+                foreach (int s1 in s.A)
+                {
+                    x++;
+                }
+                writer.Write(x);
+                foreach (int s1 in s.A)
+                {
+                    node_B = Owner_new.First;
+                    for (int k = 1; k < s1; k++)
+                    {
+                        node_B = node_B.Next;
+                    }
+                    writer.Write(node_B.Value.Name);
+                }
+                x = 0;
+            }
+            foreach (Owner k in Owner_new)
+            {
+                writer.Write(k.Name);
+                writer.Write(k.Data);
+                writer.Write(k.Category);
+                foreach (int k1 in k.B)
+                {
+                    x++;
+                }
+                writer.Write(x);
+                foreach (int k1 in k.B)
+                {
+                    node_A = Car_new.First;
+                    for (int r = 1; r < k1; r++)
+                    {
+                        node_A = node_A.Next;
+                    }
+                    writer.Write(node_A.Value.Mark);
+                }
+                x = 0;
+            }
+            writer.Close();
+            Console.WriteLine("Данные записаны в бинарный файл! ");
+            Console.WriteLine("Нажмите любую клавишу, чтобы вернуться в меню");
+        }
+        public static void From_Binary(LinkedList<Car> Car_new, LinkedList<Owner> Owner_new, string way, int Max1, int Max2)
+        {
+            BinaryReader reader = new BinaryReader(File.Open(way, FileMode.Open));
+
+            Console.WriteLine("<<Элементы списка машин>>");
+
+            int j = 1;
+            for (int k = 0; k < Max1; k++)
+            {
+                string Mark = reader.ReadString();
+                int Age = reader.ReadInt32();
+                double V = reader.ReadDouble();
+                int AllChain = reader.ReadInt32();
+                Console.WriteLine(j + ") " + Mark + ", " + Age + "-ого годвыпуска" + ", объем двигателя - " + V);
+                j++;
+                Console.WriteLine("Связанные с авто люди: ");
+                for (int k1 = 0; k1 < AllChain; k1++)
+                {
+                    Mark = reader.ReadString();
+                    Console.WriteLine(Mark);
+                }
+                Console.WriteLine("");
+            }
+
+            Console.WriteLine("<<Элементы списка людей>>");
+            int i = 1;
+            for (int k = 0; k < Max2; k++)
+            {
+
+                string Name = reader.ReadString();
+                string Data = reader.ReadString();
+                string Category = reader.ReadString();
+
+                int AllChain = reader.ReadInt32();
+
+                Console.WriteLine(i + ") " + Name + ", права получены:" + Data + " , категория прав:  " + Category);
+                i++;
+                Console.WriteLine("Связанные с авто люди: ");
+                for (int k1 = 0; k1 < AllChain; k1++)
+                {
+                    Name = reader.ReadString();
+                    Console.WriteLine(Name);
+                }
+                Console.WriteLine("");
+            }
+
+            reader.Close();
+            Console.WriteLine("Нажмите любую клавишу, чтобы вернуться в меню");
+        }
+        static void Main(string[] args)
+        {
+            LinkedList<Car> Car = new LinkedList<Car>();
+            LinkedList<Owner> Hum = new LinkedList<Owner>();
+            int maxsize1 = 0, maxsize2 = 0;
+            bool Binary = false;
+            string WayBin = null;
+            int choice = 0;
+
+            do
+            {
+                Menu();
+                choice = Convert.ToInt32(Console.ReadLine());
+
+                Console.Clear();
+
+                switch (choice)
+                {
+                    case 1:
+                        {
+                            maxsize1++;
+                            Info_Cars(ref Car);
+                            Console.WriteLine("В список добавлен новый элемент. Нажмите любую клавишу, чтобы вернуться в меню! ");
+                            Console.ReadKey(false);
+                            break;
+                        }
+                    case 2:
+                        {
+                            maxsize2++;
+                            Info_Owner(ref Hum);
+                            Console.WriteLine("В список добавлен новый элемент. Нажмите любую клавишу, чтобы вернуться в меню! ");
+                            Console.ReadKey(false);
+                            break;
+                        }
+                    case 3:
+                        {
+                            if (maxsize1 == 0 & maxsize2 == 0)
+                            {
+                                Console.WriteLine("Ваши списки пусты. ");
+                                break;
+                            }
+                            Show_All(Car, Hum, maxsize1, maxsize2);
+                            Console.ReadKey(true);
+                            Console.Clear();
+                            choice = 0;
+                            break;
+                        }
+                    case 4:
+                        {
+                            if (maxsize1 == 0 || maxsize2 == 0)
+                            {
+                                Console.WriteLine("Один из двух или оба списка не заполнены, прежде введите данные!");
+                                break;
+                            }
+                            Relation(ref Car, ref Hum);
+                            break;
+                        }
+                    case 5:
+                        {
+                            if (maxsize1 == 0 && maxsize2 == 0)
+                            {
+                                Console.WriteLine("В списках нет элементов. Нечего записать в бинарный файл!");
+                                break;
+                            }
+                            To_Binary(Car, Hum, ref WayBin);
+                            Console.ReadKey(false);
+                            Binary = true;
+                            break;
+                        }
+                    case 6:
+                        {
+                            if (Binary == false)
+                            {
+                                Console.WriteLine("Прежде сохраните данные в бинарный файл!");
+                                break;
+                            }
+                            From_Binary(Car, Hum, WayBin, maxsize1, maxsize2);
+                            Console.ReadKey(false);
+                            break;
+                        }
+                    case 7:
+                        break;
+                    default:
+                        {
+                            Console.WriteLine("Ошибка ввода. Поробуйте ещё раз: ");
+                            choice = Convert.ToInt32(Console.ReadLine());
+                            break;
+                        }
+                }
+            } while (choice != 7);
+        }
+    }
+}
